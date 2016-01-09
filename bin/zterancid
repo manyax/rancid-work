@@ -225,9 +225,9 @@ sub DoNothing {print STDOUT;}
 
 # Main
 @commandtable=(
-    {'show system-information'    => "ShowVersion"},
-#    {'show remote-management'     => "ShowManagement"},
-#    {'show logins'                => "ShowLogins"},
+    {'show version'    => "ShowVersion"},
+#    {'show remote-access'     => "ShowManagement"},
+    {'show users'                => "ShowLogins"},
 #    {'show service-control'       => "ShowSrvCtrl"},
 #    {'show snmp-server'           => "ShowSNMP"},
 #    {'show aaa accounting'        => "ShowAccount"},
