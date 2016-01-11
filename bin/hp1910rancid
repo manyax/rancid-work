@@ -1,4 +1,4 @@
-#! /usr/bin/expect --
+#! /usr/bin/perl
 ##
 ##
 ## rancid 3.2
@@ -9,6 +9,7 @@
 #
 # Modified from h3crancid for use with HP 1910 1/9/2016
 #
+# h3crancid
 #
 # h3clogin/h3crancid covers the following product ranges:
 #
@@ -57,7 +58,13 @@ my $logincmd = "hp1910login";
 my $TAIL = "/usr/bin/tail";
 #
 # Enable display of the FIB:
-my $display_fib = 1;
+my $display_fib = 0;
+#
+# Enable display of the IRF:
+my $display_irf = 0;
+#
+# Enable display of the FTM:
+my $display_ftm = 0;
 #
 # Enable display of the routing table:
 my $display_iproutes = 1;
@@ -67,6 +74,9 @@ my $display_vlan_all = 1;
 #
 # Enable display of STP root:
 my $display_stproot = 1;
+#
+# Enable display of : xrn-fabric:
+my $display_xrn = 0;
 #
 # Enable display of transceiver interface:
 my $display_xcvr_int = 0;
@@ -614,49 +624,48 @@ sub DoNothing {print STDOUT;}
     {'display version'			=> 'CommentOutput'},
     {'display boot-loader'		=> 'CommentOutput'},
     {'display startup'			=> 'CommentOutput'},
-    {'dir /all'				=> 'CommentOutput'},
-    {'dir /all unit2>flash:/'		=> 'CommentOutput'},
-    {'dir /all slot2#flash:/'		=> 'CommentOutput'},
-    {'dir /all unit3>flash:/'		=> 'CommentOutput'},
-    {'dir /all slot3#flash:/'		=> 'CommentOutput'},
-    {'dir /all unit4>flash:/'		=> 'CommentOutput'},
-    {'dir /all slot4#flash:/'		=> 'CommentOutput'},
-    {'dir /all unit5>flash:/'		=> 'CommentOutput'},
-    {'dir /all slot5#flash:/'		=> 'CommentOutput'},
-    {'dir /all unit6>flash:/'		=> 'CommentOutput'},
-    {'dir /all slot6#flash:/'		=> 'CommentOutput'},
-    {'dir /all unit7>flash:/'		=> 'CommentOutput'},
-    {'dir /all slot7#flash:/'		=> 'CommentOutput'},
-    {'dir /all unit8>flash:/'		=> 'CommentOutput'},
-    {'dir /all slot8#flash:/'		=> 'CommentOutput'},
+    {'dir /all'					=> 'CommentOutput'},
+#   {'dir /all unit2>flash:/'		=> 'CommentOutput'},
+#   {'dir /all slot2#flash:/'		=> 'CommentOutput'},
+#   {'dir /all unit3>flash:/'		=> 'CommentOutput'},
+#   {'dir /all slot3#flash:/'		=> 'CommentOutput'},
+#   {'dir /all unit4>flash:/'		=> 'CommentOutput'},
+#   {'dir /all slot4#flash:/'		=> 'CommentOutput'},
+#   {'dir /all unit5>flash:/'		=> 'CommentOutput'},
+#   {'dir /all slot5#flash:/'		=> 'CommentOutput'},
+#   {'dir /all unit6>flash:/'		=> 'CommentOutput'},
+#   {'dir /all slot6#flash:/'		=> 'CommentOutput'},
+#   {'dir /all unit7>flash:/'		=> 'CommentOutput'},
+#   {'dir /all slot7#flash:/'		=> 'CommentOutput'},
+#   {'dir /all unit8>flash:/'		=> 'CommentOutput'},
+#   {'dir /all slot8#flash:/'		=> 'CommentOutput'},
 # Commands relating to the hardware:
-    {'display device'			=> 'CommentOutput'},
-    {'display device manuinfo'		=> 'CommentOutput'},
-    {'display fan'			=> 'CommentOutput'},
-    {'display power'			=> 'CommentOutput'},
-    {'display poe powersupply'		=> 'CommentOutput'},
-    {'display poe temperature-protection'	=> 'CommentOutput'},
-    {'display transceiver interface'   => 'CommentOutput'},
+    {'display device'					=> 'CommentOutput'},
+    {'display device manuinfo'			=> 'CommentOutput'},
+    {'display poe device'				=> 'CommentOutput'},
+    {'display poe pse'					=> 'CommentOutput'},
+	{'display poe interface'			=> 'CommentOutput'},
+    {'display transceiver interface'  	=> 'CommentOutput'},
 # Commands relating to authentication:
-    {'display cluster'			=> 'CommentOutput'},
-    {'display domain'			=> 'CommentOutput'},
-    {'display local-user'		=> 'CommentOutput'},
-    {'display password-control'		=> 'CommentOutput'},
+    {'display cluster'					=> 'CommentOutput'},
+    {'display domain'					=> 'CommentOutput'},
+    {'display local-user'				=> 'CommentOutput'},
+    {'display password-control'			=> 'CommentOutput'},
     {'display password-control super'	=> 'CommentOutput'},
-    {'display ssh server status'	=> 'CommentOutput'},
+    {'display ssh server status'		=> 'CommentOutput'},
 # Commands relating to system state:
-    {'display irf'			=> 'CommentOutput'},
-    {'display xrn-fabric'		=> 'CommentOutput'},
+    {'display irf'						=> 'CommentOutput'},
+    {'display xrn-fabric'				=> 'CommentOutput'},
     {'display ftm topology-database'	=> 'CommentOutput'},
-    {'display fib'			=> 'DisplayFib'},
-    {'display ip routing-table'		=> 'DisplayIPRoutes'},
-    {'display ospf'			=> 'CommentOutput'},
-    {'display ospf brief'		=> 'CommentOutput'},
-    {'display vlan all'			=> 'CommentOutput'},
-    {'display lacp sys'			=> 'CommentOutput'},
+    {'display fib'						=> 'DisplayFib'},
+    {'display ip routing-table'			=> 'DisplayIPRoutes'},
+    {'display ospf'						=> 'CommentOutput'},
+    {'display ospf brief'				=> 'CommentOutput'},
+    {'display vlan all'					=> 'CommentOutput'},
+    {'display lacp sys'					=> 'CommentOutput'},
     {'display link-aggregation summary'	=> 'CommentOutput'},
     {'display link-aggregation verbose'	=> 'CommentOutput'},
-    {'display mirror all'		=> 'CommentOutput'},
+    {'display mirror all'				=> 'CommentOutput'},
     {'display ntp-service status'       => 'CommentOutput'},
     {'display stp root'                 => 'CommentOutput'},
 # And the system config itself:
@@ -673,6 +682,14 @@ if ($display_vlan_all == 0)
     { grep(delete $$_{'display vlan all'} , @commandtable) };
 if ($display_stproot == 0)
     { grep(delete $$_{'display stp root'} , @commandtable) };
+if ($display_irf == 0)
+    { grep(delete $$_{'display irf'} , @commandtable) };
+if ($display_xrn == 0)
+    { grep(delete $$_{'display xrn-fabric'} , @commandtable) };
+if ($display_ftm == 0)
+    { grep(delete $$_{'display ftm topology-database'} , @commandtable) };
+if ($display_ospf == 0)
+    { grep(delete $$_{'display ospf'} , @commandtable) };	
 if ($display_xcvr_int == 0)
     { grep(delete $$_{'display transceiver interface'} , @commandtable) };
 
