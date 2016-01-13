@@ -1,4 +1,5 @@
 #! /usr/bin/expect --
+#
 ##
 ## rancid 3.2
 ## Copyright (c) 1997-2015 by Terrapin Communications, Inc.
@@ -15,7 +16,6 @@
 # the process of enabling and the prompt will be the "#" prompt.
 # The default username password is the same as the vty password.
 #
-
 # Usage line
 set usage "Usage: $argv0 \[-dSV\] \[-autoenable\] \[-noenable\] \[-c command\] \
 \[-Evar=x\] \[-e enable-password\] \[-f cloginrc-file\] \[-p user-password\] \

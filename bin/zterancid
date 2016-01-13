@@ -1,5 +1,6 @@
 #! /usr/bin/perl
 ##
+## $Id:
 ##
 ## @PACKAGE@ @VERSION@
 ## Copyright (C) 2015 by Kentec Communications, Inc.
@@ -19,8 +20,9 @@
 ## Except where noted otherwise, rancid was written by and is maintained by
 ## Henry Kilmer, John Heasley, Andrew Partan, Pete Whiting, and Austin Schutz.
 ##
+# zterancid - ZTE ethernet switches by Alexandru Musat <manyax@manyax.net>
 #
-# zterancid - adapted for ZTE ethernet switches by Alexandru Musat <manyax@manyax.net>
+# Modified from zyrancid for use with ZTE 1/9/2016
 #
 #  RANCID - Really Awesome New Cisco confIg Differ
 #
@@ -153,18 +155,18 @@ sub ShowVersion {
     s/\x1b\x37//g;	# ANSI escape code: Save Cursor Position
     if (/^$prompt/) { $found_version=1; last};
     next if(/^(\s*|\s*$cmd\s*)$/);
-    return(1) if (/\s+\%Invalid command \".*\"/);
+    return(1) if (/\s+\%  Command not found \".*\"/);
     return(0) if ($found_version);      # Only do this routine once
 
     # in case the pager prompt shows up
     s/^----- more -----.*ESC//;
 
     # ignore "System up Time" value
-    s/^(System up Time\s+:\s).*$/$1<removed>/;
-
+    s/^(    System uptime\s+is\s).*$/$1[removed]/;
+    s/^(    Onboard temperature\s+:\s).*$/$1[removed]/;
     ProcessHistory("COMMENTS","keysort","A1","! $_");
     }
-    
+
     return(0);
 }
 
@@ -178,7 +180,7 @@ sub ShowMisc { # keyval
     s/\x1b\x37//g;	# ANSI escape code: Save Cursor Position
     if (/^$prompt/) { $found_version=1; last};
     next if(/^(\s*|\s*$cmd\s*)$/);
-    return(1) if (/\s+\%Invalid command \".*\"/);
+    return(1) if (/\s+\%  Command not found \".*\"/);
 
     # in case the pager prompt shows up
     s/^----- more -----.*ESC//;
@@ -189,13 +191,12 @@ sub ShowMisc { # keyval
     return(0);
 }
 
-sub ShowManagement  { ShowMisc("B1"); }
-sub ShowLogins      { ShowMisc("C1"); }
-sub ShowSrvCtrl     { ShowMisc("D1"); }
+sub ShowFan         { ShowMisc("B1"); }
+sub ShowAuth        { ShowMisc("C1"); }
+sub ShowLogins      { ShowMisc("D1"); }
 sub ShowSNMP        { ShowMisc("E1"); }
-sub ShowAccount     { ShowMisc("F1"); }
-sub ShowAuthen      { ShowMisc("G1"); }
-sub ShowAuthoriz    { ShowMisc("H1"); }
+sub ShowRadius      { ShowMisc("F1"); }
+sub ShowRemoteAcc   { ShowMisc("G1"); }
 
 sub ShowConfig {
     print STDERR "    In ShowConfig: $_" if ($debug);
@@ -206,17 +207,13 @@ sub ShowConfig {
     s/\x1b\x37//g;	# ANSI escape code: Save Cursor Position
     if (/^$prompt/) { $found_end=1; $clean_run=1; return 0};
     next if(/^(\s*|\s*$cmd\s*)$/);
-    return(1) if (/\s+\%Invalid command \".*\"/);
+    return(1) if (/\s+\%  Command not found \".*\"/);
 
 
     # in case the pager prompt shows up
     s/^----- more -----.*ESC//;
 
-    if (/^\s*(Building configuration...|Current configuration:)\s*$/) {
-        ProcessHistory("COMMENTS","","","! $_");
-    } else {
-        ProcessHistory("","","","$_");
-    }
+    ProcessHistory("","","","$_");
     }
 }
 
@@ -225,15 +222,14 @@ sub DoNothing {print STDOUT;}
 
 # Main
 @commandtable=(
-    {'show version'    => "ShowVersion"},
-#    {'show remote-access'     => "ShowManagement"},
-    {'show users'                => "ShowLogins"},
-#    {'show service-control'       => "ShowSrvCtrl"},
-#    {'show snmp-server'           => "ShowSNMP"},
-#    {'show aaa accounting'        => "ShowAccount"},
-#    {'show aaa authentication'    => "ShowAuthen"},
-#    {'show aaa authorization'     => "ShowAuthoriz"},
-    {'show running-config'        => "ShowConfig"},
+    {'show version'             => "ShowVersion"},
+    {'show fan'         	=> "ShowFan"},
+    {'show loginauth'           => "ShowAuth"},
+    {'show user'                => "ShowLogins"},
+    {'show snmp'                => "ShowSNMP"},
+    {'show radius'              => "ShowRadius"},
+    {'show remote-access'       => "ShowRemoteAcc"},
+    {'show running-config'      => "ShowConfig"},
 );
 
 # Use array to preserve order of commands, and hash for mapping to subroutine

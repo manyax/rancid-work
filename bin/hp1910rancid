@@ -84,7 +84,7 @@ my $display_xcvr_int = 0;
 # END OF END-USER TWEAKS
 #############################################################################
 
-my $rancid_type = 'h3c';
+my $rancid_type = 'HP 1910';
 
 use Getopt::Std;
 getopts('dflt:CV');
@@ -840,3 +840,4 @@ if (scalar(%commands) || !$clean_run || !$found_end) {
     }
     unlink "$host.new" if (! $debug);
 }
+
